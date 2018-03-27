@@ -1,100 +1,74 @@
 package com.handel.handel;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.handel.dao.ProfileDAO;
-import com.handel.model.Profile;
+import com.handel.vo.ResponseVO;
+import com.handel.ws.HandlerWS;
+import com.handel.ws.UsuarioWS;
 
-public class MenuActivity extends AppCompatActivity
+public class MenuActivity extends AbstractActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public static final String LOG_CLASS = "MenuActivity";
 
-    private Profile selected;
     private boolean cameraTurnOn;
     private static Camera camera;
-
-    public Profile getSelected() {
-        return selected;
-    }
-
-    public void setSelected(Profile selected) {
-        this.selected = selected;
-    }
+    private DrawerLayout drawerLayout;
+    private ProgressBar progressView;
+    private UsuarioWS wsUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.menu_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.menu_toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(),"Gallery",Toast.LENGTH_SHORT);
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.menu_drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.menu_nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        progressView = (ProgressBar)findViewById(R.id.menu_progress);
+        wsUsuario = new UsuarioWS();
 
-        selected = new Profile();
-        selected.setImg("MiImagenPerfil");
-        selected.setName("Marco Antonio Salazar");
-        selected.setEmail("marcosalazar@hotmail.com");
-
-
-        ConstraintLayout layout = (ConstraintLayout)findViewById(R.id.contentLayout);
+        ConstraintLayout layout = (ConstraintLayout)findViewById(R.id.menu_content_layout);
         TextView text = new TextView(this);
-        text.setText("TextViwe added dynamically");
+        text.setText("TextView added dynamically"+getString(R.string.unauthorized));
         //ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams();
         //LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT,1.0f);
         //text.setLayoutParams(params);
         //layout.addView(text);
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.profiles_recycler_view);
+        /*
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.menu_recomendados_recycler_view);
 
-        MenuAdapter adapter = new MenuAdapter(ProfileDAO.findProfiles(null));
+        ServicioAdapter adapter = new ServicioAdapter(ServicioWS.findServicios(null));
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
+        */
     }
     @Override
     public void onStart(){
@@ -104,7 +78,7 @@ public class MenuActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.menu_drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -115,10 +89,10 @@ public class MenuActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.profile, menu);
+        getMenuInflater().inflate(R.menu.menu_options, menu);
 
-        ((TextView)findViewById(R.id.txtName)).setText(selected.getName());
-        ((TextView)findViewById(R.id.txtEmail)).setText(selected.getEmail());
+        ((TextView)findViewById(R.id.txtName)).setText("Marco Antonio Salazar");
+        ((TextView)findViewById(R.id.txtEmail)).setText("marco.salazar@gmail.com");
 
         return true;
     }
@@ -144,22 +118,23 @@ public class MenuActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_buys) {
 
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_favorites) {
+            Log.i(LOG_CLASS,"Favoritos");
+        } else if (id == R.id.nav_messages) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_payment_methods) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_cfg_account) {
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_legal) {
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_exit) {
 
         }
         Log.i(LOG_CLASS,"Click Item Menu "+item.getItemId());
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
     public boolean onClickTools(MenuItem item){
@@ -201,45 +176,61 @@ public class MenuActivity extends AppCompatActivity
         Log.i(LOG_CLASS,"Click Camera");
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
-        /*try {
-            if (ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED){
-                Log.i("INFO", "No hay permisos sobre la camara");
-                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 1);
-            } else{
-                Log.i("INFO", "Si hay permisos sobre la camara");
-            }
-            if (ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                if (this.getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
-                    if (!cameraTurnOn) {
-                        Log.i("INFO", "Numero de camaras: " + Camera.getNumberOfCameras());
-                        camera = Camera.open();
-                        Camera.Parameters p = camera.getParameters();
-                        p.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
-                        camera.setParameters(p);
-                        camera.startPreview();
-                        cameraTurnOn = true;
-                        Log.i("INFO", "INICIO NORMALMENTE");
-                    } else {
-                        Log.i("INFO", "DETENIENDO CAMARA");
-                        camera.stopPreview();
-                        camera.release();
-                        cameraTurnOn = false;
-                    }
-                } else {
-                    Log.e("Error", "No camera");
-                }
-            }
-        //} catch(Exception e) {
-          //  Log.e("Error", ""+e);
-        //}*/
         return true;
     }
-    public void onClickProfileItem(View view){
-        TextView textIdProfile = view.findViewById(R.id.profile_item_id_profile);
-        Log.i(LOG_CLASS,"getting IdProfile: "+textIdProfile.getText().toString());
-        Profile profile = ProfileDAO.find(Long.valueOf(textIdProfile.getText().toString()));
-        Intent intent = new Intent(this, ProfileActivity.class);
-        intent.putExtra("profile",profile);
+    public void onClickServicioItem(View view){
+        /*
+        TextView textIdServicio = view.findViewById(R.id.servicio_item_id_servicio);
+        Log.i(LOG_CLASS,"getting IdProfile: "+textIdServicio.getText().toString());
+        ServicioVO servicio = ServicioWS.find(Long.valueOf(textIdServicio.getText().toString()));
+        Intent intent = new Intent(this, ServicioActivity.class);
+        intent.putExtra("servicio",servicio);
         startActivity(intent);
+        */
     }
+    public void onSearchServicios(View view){
+        startActivity(new Intent(this, BusquedaServicioActivity.class));
+    }
+    public boolean onClickFavoritos(MenuItem item){
+        startActivity(new Intent(this, FavoritosActivity.class));
+        return true;
+    }
+    public boolean onClickServicios(MenuItem item){
+        startActivity(new Intent(this, ServiciosActivity.class));
+        return true;
+    }
+    public boolean onClickMetodosPago(MenuItem item){
+        startActivity(new Intent(this, MetodosPagoActivity.class));
+        return true;
+    }
+    public boolean onClickMapa(MenuItem item){
+        startActivity(new Intent(this, MapsActivity.class));
+        return true;
+    }
+    public boolean onClickExit(MenuItem item){
+        drawerLayout.closeDrawer(GravityCompat.START);
+        progressView.setVisibility(View.VISIBLE);
+        wsUsuario.closeSesionAsync(new HandlerWS() {
+            @Override
+            public void onSuccess(ResponseVO vo) {
+                onCloseSesion(vo);
+            }
+            @Override
+            public void onError(Exception e) {
+                runOnUiThread(() -> {
+                    progressView.setVisibility(View.GONE);
+                    showErrorPrompt(e);
+                });
+            }
+        },null);
+        return true;
+    }
+    private void onCloseSesion(ResponseVO r){
+        runOnUiThread(() -> {
+            progressView.setVisibility(View.GONE);
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        });
+    }
+
 }

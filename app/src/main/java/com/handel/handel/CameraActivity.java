@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends AbstractActivity {
     
     private static final String LOG_CLASS = "CameraActivity";
     private Button takePictureButton;

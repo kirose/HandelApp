@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_buys"
+            android:icon="@drawable/ic_buys"
+            android:title="@string/buys" />
+        <item
+            android:id="@+id/nav_favorites"
+            android:icon="@drawable/ic_favorites"
+            android:title="@string/favorites"
+            android:onClick="onClickFavoritos" />
+        <item
+            android:id="@+id/nav_messages"
+            android:icon="@drawable/ic_messages"
+            android:title="@string/messages" />
+        <item
+            android:id="@+id/nav_sericios"
+            android:icon="@drawable/ic_portfolio"
+            android:title="@string/services"
+            android:onClick="onClickServicios"/>
+        <item
+            android:id="@+id/nav_payment_methods"
+            android:icon="@drawable/ic_payment_methods"
+            android:title="@string/payment_methods"
+            android:onClick="onClickMetodosPago"/>
+        <item
+            android:id="@+id/nav_cfg_account"
+            android:icon="@drawable/ic_cfg_account"
+            android:title="@string/cfg_account" />
+        <item
+            android:id="@+id/nav_legal"
+            android:icon="@drawable/ic_info"
+            android:title="@string/legal" />
+        <item
+            android:id="@+id/nav_map"
+            android:icon="@drawable/ic_mapa"
+            android:title="@string/map"
+            android:onClick="onClickMapa"/>
+    </group>
+
+    <item android:title="">
+        <menu>
+            <item
+                android:id="@+id/nav_exit"
+                android:icon="@drawable/ic_logout"
+                android:title="@string/exit"
+                android:onClick="onClickExit"/>
+        </menu>
+    </item>
+
+</menu>
